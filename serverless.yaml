@@ -1,12 +1,23 @@
-service: YOURSERVICE
+service: {YOURFUNCTION} # !!! Do not change will be modified automatically during deployment
 package:
-    exclude:
-        - tests
-        - nbproject/**        
-        - vendor/bin/**
-        - .vagrant/**
-        - RoboFile.php
-        - phpunit.xml
+  exclude:
+    - .git/**
+    - .serverless/**
+    - .vagrant/**
+    - .vscode/**
+    - nbproject/**
+    - new/**
+    - old/**
+    - tests/**
+    - vendor/bin/**
+    - .gitignore
+    - .travis.yml
+    - composer.json
+    - composer.lock
+    - package.json
+    - package-lock.json
+    - phpunit.xml
+    - RoboFile.php
 
 provider:
   name: openwhisk
@@ -15,11 +26,11 @@ provider:
   timeout: 6 # optional, default is 6
 
 functions:
-  YOURFUNCTION:
+  {YOURFUNCTION}: # !!! Do not change will be modified automatically during deployment
     handler: serverless.main
-    name: YOURFUNCTION
+    name: {YOURFUNCTION} # !!! Do not change will be modified automatically during deployment
     annotations:
       web-export: true
 
 plugins:
-- serverless-openwhisk
+  - serverless-openwhisk

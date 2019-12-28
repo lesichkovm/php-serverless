@@ -25,8 +25,7 @@ function baseUrl($path = '') {
  * Returns a database instance
  * @return \Sinevia\SqlDb
  */
-function db()
-{
+function db() {
     static $db = null;
 
     if (is_null($db)) {
@@ -52,8 +51,7 @@ if (\Sinevia\Registry::equals('USE_ELOQUENT', true)) {
     /**
      * Setups the Eloquent environment
      */
-    function eloquent()
-    {
+    function eloquent_init() {
         $dbType = \Sinevia\Registry::get('DB_TYPE');
         $dbHost = \Sinevia\Registry::get('DB_HOST');
         $dbName = \Sinevia\Registry::get('DB_NAME');
@@ -62,8 +60,8 @@ if (\Sinevia\Registry::equals('USE_ELOQUENT', true)) {
         $dbPort = \Sinevia\Registry::get('DB_PORT');
 
         $capsule = new Illuminate\Database\Capsule\Manager;
-        //var_dump($dbType);
-        //var_dump($dbHost);
+//var_dump($dbType);
+//var_dump($dbHost);
         $capsule->addConnection([
             "driver" => $dbType,
             "host" => $dbHost,
@@ -73,21 +71,28 @@ if (\Sinevia\Registry::equals('USE_ELOQUENT', true)) {
             "password" => $dbPass,
         ]);
 
-        // Model events
+// Model events
         $capsule->setEventDispatcher(new \Illuminate\Events\Dispatcher(new Illuminate\Container\Container));
 
-        //Make this Capsule instance available globally.
+//Make this Capsule instance available globally.
         $capsule->setAsGlobal();
 
-        // Setup the Eloquent ORM.
+// Setup the Eloquent ORM.
         $capsule->bootEloquent();
     }
 
-    eloquent(); // Initioalize eloquent
+    eloquent_init(); // Initialize eloquent
+
+    function eloquent($connection = "default") {
+        $capsule = new Illuminate\Database\Capsule\Manager;
+        return $capsule->connection($connection);
+    }
+
 }
 
 
 if (function_exists('env') == false) {
+
     /**
      * Returns an env variable from OPEN WHISK
      * @return mixed
@@ -96,6 +101,7 @@ if (function_exists('env') == false) {
         $env = json_decode($_ENV['WHISK_INPUT'], true);
         return $env[$key] ?? $default;
     }
+
 }
 
 function htmlFormatPriceWithCurrencySymbol($amount, $currency) {
@@ -153,12 +159,12 @@ function joinCss($styles, $options = []) {
     $html .= '<style>';
     foreach ($styles as $style) {
         $path = basePath('public/' . trim($style, '/'));
-        // DEBUG: $html .= '/* '.$path.' */';
+// DEBUG: $html .= '/* '.$path.' */';
         if (file_exists($path)) {
             $contents = file_get_contents($path);
-            //if ($minify == "yes") {
-            //    $contents = ';' . \JSMin\JSMin::minify($contents);
-            //}
+//if ($minify == "yes") {
+//    $contents = ';' . \JSMin\JSMin::minify($contents);
+//}
             $html .= $contents;
         }
     }
@@ -188,7 +194,6 @@ function joinScripts($scripts, $options = []) {
     return $html;
 }
 
-
 /**
  * Redirects to the specified URL
  * @return string
@@ -196,7 +201,6 @@ function joinScripts($scripts, $options = []) {
 function redirect($url) {
     return "<meta http-equiv=\"refresh\" content=\"0;url=$url\">\r\n";
 }
-
 
 /**
  * Returns the requested $_REQUEST name-value pair if it exists
@@ -210,7 +214,6 @@ function req($name, $default = null, $functions = []) {
     return $value;
 }
 
-
 /**
  * Returns the requested $_SESSION name-value pair if it exists
  * @return string
@@ -222,7 +225,6 @@ function sess($name, $default = null, $functions = [], $options = []) {
     }
     return $value;
 }
-
 
 /**
  * Returns a once value if it exists in $_SESSION if it exists
@@ -249,7 +251,6 @@ function reqOrSess($name, $default = null, $functions = []) {
     return $default;
 }
 
-
 /**
  * Renders a template
  * @return string
@@ -259,7 +260,7 @@ function ui($view, $vars = array(), $options = array()) {
     if ($ext == '') {
         $view .= '.phtml';
     }
-    $template = basePath('app/views/' . ltrim($view, '/'));
+    $template = basePath(basePath('views/' . ltrim($view, '/')));
     return \Sinevia\Template::fromFile($template, $vars, $options);
 }
 
@@ -267,7 +268,19 @@ function ui($view, $vars = array(), $options = array()) {
  * Renders a Blade template
  * @return string
  */
-function view($view, $data) {
-    $blade = new \Jenssegers\Blade\Blade(basePath('views'), basePath('cache'));
-    return $blade->render($view, $data);
+if (function_exists('view') == false) {
+
+    function view($view, $data = []) {
+        $blade = new \Jenssegers\Blade\Blade(basePath('views'), basePath('tmp/cache'));
+        return $blade->render($view, $data);
+    }
+
+} else {
+
+    function blade($view, $data = []) {
+        $blade = new \Jenssegers\Blade\Blade(basePath('views'), basePath('tmp/cache'));
+        return $blade->render($view, $data);
+    }
+
 }
+    

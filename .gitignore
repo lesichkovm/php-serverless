@@ -1,2 +1,7 @@
 /nbproject/
-/.phpunit.result.cache
+/node_modules/
+/vendor/
+.phpunit.result.cache
+composer.lock
+package-lock.json
+app/database/local.database.sqlite3
